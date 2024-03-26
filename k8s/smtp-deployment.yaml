@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.32.0 (HEAD)
+  labels:
+    io.kompose.service: smtp
+  name: smtp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: smtp
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.32.0 (HEAD)
+      labels:
+        io.kompose.network/emissary-default: "true"
+        io.kompose.service: smtp
+    spec:
+      containers:
+        - image: ghcr.io/literalgarage/smtp-logger:latest
+          name: smtp
+          ports:
+            - containerPort: 8025
+              hostPort: 8025
+              protocol: TCP
+      restartPolicy: Always

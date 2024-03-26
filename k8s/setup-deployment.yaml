@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.32.0 (HEAD)
+  labels:
+    io.kompose.service: setup
+  name: setup
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: setup
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.32.0 (HEAD)
+      labels:
+        io.kompose.network/emissary-default: "true"
+        io.kompose.service: setup
+    spec:
+      containers:
+        - args:
+            - --setup
+            - --port
+            - "8888"
+          env:
+            - name: EMISSARY_CONFIG
+              value: file:///data/config/config.json
+          image: "emissary:dev"
+          imagePullPolicy: IfNotPresent
+          name: setup
+          ports:
+            - containerPort: 8888
+              hostPort: 8888
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data/config
+              name: configdata
+      restartPolicy: Always
+      volumes:
+        - name: configdata
+          persistentVolumeClaim:
+            claimName: configdata
